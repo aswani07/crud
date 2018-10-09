@@ -1,0 +1,131 @@
+#%RAML 1.0
+
+title: Customer API
+description: Executes CRUD operations on Customer Table
+version: v1
+protocols: 
+  - HTTP
+  - HTTPS
+mediaType: application/json
+baseUri: https://mocksvc.mulesoft.com/mocks/8563fdfc-4a0a-4f7a-8011-36036a7ce8c5/api/ # baseUri: http://customer-api.us-e2.cloudhub.io/api/
+types: 
+  customer : !include customer.raml
+  error: !include error.raml
+  customerPost: !include customer-post.raml
+  customerDelete: !include customer-delete.raml
+
+/customers:
+
+ post:
+  description:  Insert/Create multiple customers in database
+ 
+  responses:      
+   200: 
+      
+       body: 
+        application/json:
+         type: array
+         items: 
+          type: customer
+         example: !include customerId-example.raml
+
+   204:
+     description: Unable to create/insert the customer record
+     body: 
+      example: []
+   400:
+      body:
+       application/json:
+         schema: error
+         example: !include error-example.raml
+
+ get:
+   description: To retreive all customer records
+   queryParameters: 
+     phoneNumber:
+      type: string
+      required: false
+
+   responses: 
+     200: 
+      body: 
+        application/json:
+         type: array
+         items: 
+          type: customer
+         example: !include customerId-example.raml
+     204:
+      description: When no customer is found
+      body: 
+        example: []
+     400:
+      body:
+       application/json:
+         schema: error
+         example: !include error-example.raml
+
+ /{customerId}:
+  uriParameters: 
+    customerId:
+     required: true
+     type: integer
+  delete:
+   responses: 
+     200:
+      body:
+       application/json:
+        schema: customerDelete
+        example: !include customer-delete-example.raml
+     400:
+      body:
+       example: !include error-example.raml
+
+  get:
+   responses: 
+    200:
+     body: 
+        application/json:
+         type: array
+         items: 
+          type: customer
+         example: !include customer-example.raml
+    204:
+     body:
+      schema: nil
+    400:
+     description: 
+     body: 
+       application/json:
+         schema: error
+         example: !include error-example.raml
+         
+
+
+          
+           
+  
+  
+
+
+         
+       
+
+      
+   
+
+
+
+   
+   
+
+      
+      
+
+
+          
+
+
+        
+
+     
+  
