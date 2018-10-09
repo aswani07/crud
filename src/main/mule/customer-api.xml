@@ -17,7 +17,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
     <db:config name="Database_Config" doc:name="Database Config" doc:id="20f5703e-e8df-4dd5-a902-b9b3a232116e" >
 		<db:my-sql-connection host="${dev.host}" port="${dev.port}" user="${dev.user}" password="${dev.password}" database="${dev.database}" />
 	</db:config>
-	<configuration-properties doc:name="Configuration properties" doc:id="82b56b97-c171-4bc2-bb6d-e3ab908bf394" file="customer-api-dev.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="82b56b97-c171-4bc2-bb6d-e3ab908bf394" file="customer-api-${env}.yaml" />
 	<flow name="customer-api-main">
         <http:listener config-ref="customer-api-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
