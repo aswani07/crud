@@ -217,19 +217,19 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 	<flow name="postCustomerFlow">
         <logger level="INFO" doc:name="Logger" doc:id="4f978632-fbb8-493f-a370-172aeb1003ac" message='"Starting insert operation"'/>
 		<foreach doc:name="For Each" doc:id="e522b6d4-4651-400f-8e33-d93d47691197" >
-			<db:insert doc:name="Insert" doc:id="db41b739-9109-47f5-b247-ccd913c0bb84" config-ref="Database_Config">
-			<db:sql>  INSERT INTO training_an.customer ( customer_id, customer_lastName, customer_firstName,customer_phoneNumber,customer_emailId,customer_SSN )
-   VALUES
-   ( :id,:lastname,:firstname ,:phonenumber,:email,:ssn);</db:sql>
-			<db:input-parameters><![CDATA[#[{
+			<db:bulk-insert doc:name="Bulk insert" doc:id="ef115ac7-0a7e-447f-86e0-f81b41a69051" config-ref="Database_Config">
+				<db:bulk-input-parameters ><![CDATA[#[{
  id : payload.customerId,
  lastname : payload.lastName,
  firstname : payload.firstName,
  phonenumber : payload.phoneNumber,
  email : payload.emailId,
  ssn : payload.SSN
-  }]]]></db:input-parameters>
-		</db:insert>
+  }]]]></db:bulk-input-parameters>
+				<db:sql >  INSERT INTO training_an.customer ( customer_id, customer_lastName, customer_firstName,customer_phoneNumber,customer_emailId,customer_SSN )
+   VALUES
+   ( :id,:lastname,:firstname ,:phonenumber,:email,:ssn);</db:sql>
+			</db:bulk-insert>
 		</foreach>
 		<logger level="INFO" doc:name="Logger" doc:id="403d53d4-b262-43b7-9283-80252b4e08c6" message="#[payload]"/>
 		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
