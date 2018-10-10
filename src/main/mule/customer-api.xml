@@ -18,7 +18,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
     <db:config name="Database_Config" doc:name="Database Config" doc:id="20f5703e-e8df-4dd5-a902-b9b3a232116e" >
 		<db:my-sql-connection host="${dev.host}" port="${dev.port}" user="${dev.user}" password="${dev.password}" database="${dev.database}" />
 	</db:config>
-	<configuration-properties doc:name="Configuration properties" doc:id="82b56b97-c171-4bc2-bb6d-e3ab908bf394" file="customer-api-dev.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="82b56b97-c171-4bc2-bb6d-e3ab908bf394" file="customer-api-${env}.yaml" />
 	<flow name="customer-api-main">
         <http:listener config-ref="customer-api-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -226,7 +226,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
     ssn: $.SSN
 }]]]></db:bulk-input-parameters>
 			<db:sql>  INSERT INTO training_an.customer ( customer_id, customer_lastName, customer_firstName,customer_phoneNumber,customer_emailId,customer_SSN )
-   VALUES ( :id,:lastname,:firstname ,:phonenumber,:email,:ssn);</db:sql>
+   VALUES ( :id,:lastName,:firstName ,:phoneNumber,:emailId,:ssn);</db:sql>
 		</db:bulk-insert>
 		<ee:transform doc:name="Transform Message" doc:id="4c303697-49e7-447e-a606-ab08c2752998" >
 			<ee:message >
