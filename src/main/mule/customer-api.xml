@@ -217,16 +217,14 @@ payload map ( payload01 , indexOfPayload01 ) -> {
     </flow>
 	<flow name="postCustomerFlow">
 		<db:bulk-insert doc:name="Bulk insert" doc:id="a205b0d5-de94-4e31-a362-2e10a671694d" config-ref="Database_Config">
-			<db:bulk-input-parameters ><![CDATA[#[
-payload map ( payload01 , indexOfPayload01 ) -> {
-	firstName: payload01.customer_firstName,
-	lastName: payload01.customer_lastName,
-	phoneNumber: payload01.customer_phoneNumber,
-	customerId: payload01.customer_id,
-	emailId: payload01.customer_emailId,
-	SSN: payload01.customer_SSN
-}
-]]]></db:bulk-input-parameters>
+			<db:bulk-input-parameters ><![CDATA[#[{
+ id : payload.customerId,
+ lastname : payload.lastName,
+ firstname : payload.firstName,
+ phonenumber : payload.phoneNumber,
+ email : payload.emailId,
+ ssn : payload.SSN
+  }]]]></db:bulk-input-parameters>
 			<db:sql>  INSERT INTO training_an.customer ( customer_id, customer_lastName, customer_firstName,customer_phoneNumber,customer_emailId,customer_SSN )
    VALUES ( :id,:lastname,:firstname ,:phonenumber,:email,:ssn);</db:sql>
 		</db:bulk-insert>
