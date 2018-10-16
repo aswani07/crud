@@ -2,8 +2,8 @@
 dev:
  host: "training4quintrix.clfl8y3ktaxf.us-west-2.rds.amazonaws.com"
  port: "3306"
- user: "root4training"
- password: "root4trainingp"
+ user: "![2qfdQOpyUcgCQUGGBY1DHQ==]"
+ password: "![2qfdQOpyUcgVltPoWvvHQQ==]"
  database: "training_an"
  
  ##Host Config ##

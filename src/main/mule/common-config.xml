@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	  <db:config name="Database_Config" doc:name="Database Config" doc:id="e921daad-7f8c-4681-9b30-0aa7f5f36586" >
+		<db:my-sql-connection host="${secure::dev.host}" port="${secure::dev.port}" user="${secure::dev.user}" password="${secure::dev.password}" database="${secure::dev.database}" />
+	</db:config>
+	<!--  <configuration-properties doc:name="Configuration properties" doc:id="c3a59737-91fb-4923-8a33-a733d37771c2" file="customer-api-${env}.yaml" />-->
+	<!--  <api-gateway:autodiscovery apiId="15550813" doc:name="API Autodiscovery" doc:id="cf1d880f-4452-4d1e-8b1c-43a2306c0f94" flowRef="customer-api-main" />-->
+	  <http:listener-config name="customer-api-httpListenerConfig">
+        <http:listener-connection host="${secure::http.host}" port="${secure::http.port}" />
+    </http:listener-config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="30e40311-090a-472c-a1a8-c7a231be7b88" file="customer-api-dev.yaml" key="helloWorld123" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="26d9bcda-f4f8-46ef-a891-f42ac17bbd13" >
+		<email:smtp-connection host="smtp.gmail.com">
+		</email:smtp-connection>
+	</email:smtp-config>
+		<tls:context name="TLS_Context" doc:name="TLS Context" doc:id="cda4ef9b-8f5a-422c-bcac-292df9667faa" >
+		<tls:trust-store insecure="true" />
+	</tls:context>
+		
+	
+	
+</mule>
