@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	
 	<flow name="deleteCustomerByIdFlow">
         <logger level="INFO" doc:name="Logger" doc:id="99d8e3c8-6325-4519-b451-3bdd75ba6182" message='"Starting delete operation"'/>
@@ -71,34 +73,59 @@ output application/java
         </ee:transform>
         <error-handler ref="globalErrorHandler"/>
     </flow>
-    <flow name="getCustomerByIdFlow">
+	<flow name="getCustomerByIdFlow">
 		<logger level="INFO" doc:name="Logger" doc:id="47798129-e2aa-45c2-b25a-ef85a582a1bd" message='"Starting select operation"'/>
-		<db:select doc:name="Select" doc:id="1adedf33-2554-4d2b-a707-c9be2d34e743" config-ref="Database_Config">
-			<db:sql >select * from training_an.customer where customer_id = :id</db:sql>
+		<set-variable value="#[attributes.uriParams.customerId]" doc:name="Access CustomerID Variable" doc:id="6c9cdeca-bf59-450c-a789-6d0ad40f4eb2" variableName="customerId"/>
+		<db:select doc:name="Select" doc:id="1adedf33-2554-4d2b-a707-c9be2d34e743" config-ref="Database_Config" target="dbResponse">
+			<db:sql >select * from training_an.customer where customer_id = :id;</db:sql>
 			<db:input-parameters ><![CDATA[#[{
-id: attributes.uriParams.customerId
+id: vars.customerId
 }]]]></db:input-parameters>
 		</db:select>
-		<logger level="INFO" doc:name="Logger" doc:id="e2f8c437-4cfc-4aed-b267-75181fb6c228" message="#[payload]"/>
 		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" doc:id="2e9befc4-2bf8-4f7e-9f72-92814a6d3456">
-            <ee:variables>
+            <ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://address-service.us-e2.cloudhub.io/QuintrixAddressService?wsdl
+ns ns01 http://quintrix.com/QuintrixAddressService
+---
+{
+	ns01#GetAddressRequest: {
+		customerId: vars.customerId
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
                 <ee:set-variable variableName="customerId"><![CDATA[attributes.uriParams.customerId]]></ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+        <wsc:consume operation="getCustomerAddress" doc:name="Consume" doc:id="c32c0103-6d5a-4bcf-8998-e7fc0fdb80c8" config-ref="Web_Service_Consumer_Config" />
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="9ed24b5d-eb56-4e55-995b-372b845817a7">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
+ns ns0 http://quintrix.com/QuintrixAddressService
+var countryCode = lookup("countryRESTAPI-flow","samplePayload")
 ---
-payload map ( payload01 , indexOfPayload01 ) -> {
-	firstName: payload01.customer_firstName,
-	lastName: payload01.customer_lastName,
-	phoneNumber: payload01.customer_phoneNumber,
-	customerId: payload01.customer_id,
-	emailId: payload01.customer_emailId,
-	SSN: payload01.customer_SSN
-}]]></ee:set-payload>
+{
+	firstName: vars.dbResponse.customer_firstName,
+	lastName: vars.dbResponse.customer_lastName,
+	phoneNumber: vars.dbResponse.customer_phoneNumber,
+	customerId: vars.dbResponse.customer_id,
+	emailId: vars.dbResponse.customer_emailId,
+	SSN: vars.dbResponse.customer_SSN,
+	address:{
+	address1: payload.body.ns0#GetAddressResponse.address1 default "",
+	address2: payload.body.ns0#GetAddressResponse.address2 default "",
+	city: payload.body.ns0#GetAddressResponse.city default "",
+	stateOrProvince: payload.body.ns0#GetAddressResponse.stateOrProvince default "",
+	postalCode: payload.body.ns0#GetAddressResponse.postalCode default "IN",
+	countryCodes: (countryCode filter ($.countryName contains payload.body.ns0#GetAddressResponse.country default "")) [0].countryCode default "IN"
+	 },
+	
+	}
+]]></ee:set-payload>
             </ee:message>
 			<ee:variables >
 				<ee:set-variable variableName="outboundHeaders" ><![CDATA[%dw 2.0
@@ -109,9 +136,16 @@ output application/java
 }]]></ee:set-variable>
 			</ee:variables>
         </ee:transform>
-        <error-handler ref="globalErrorHandler"/>
+		<error-handler ref="globalErrorHandler"/>
     </flow>
-		<flow name="postCustomerFlow">
+		<flow name="countryRESTAPI-flow" doc:id="cc754a66-5019-4c34-bce0-2a6ce4f20893" >
+		<ee:cache doc:name="Cache" doc:id="b99903f8-f068-4b39-b8c0-3a0f302d80b0" >
+			<logger level="INFO" doc:name="Logger" doc:id="5edebe7a-f456-427e-b4b4-b93931baff4e" message="before request"/>
+			<http:request method="GET" doc:name="Request" doc:id="40184c06-eaa1-4da5-a460-f821ce5bfc71" config-ref="HTTP_Request_configuration" path="/country" />
+			<logger level="INFO" doc:name="Logger" doc:id="270e98b1-0514-4efc-a90c-0688e9d437d3" message="after request"/>
+		</ee:cache>
+	</flow>
+	<flow name="postCustomerFlow">
 		<db:bulk-insert doc:name="Bulk insert" doc:id="5fec449c-8491-42db-9379-f4b7cbd9f6af" config-ref="Database_Config">
 			<db:bulk-input-parameters ><![CDATA[#[payload map {
     id: $.customerId,
@@ -144,4 +178,5 @@ output application/java
 		</ee:transform>
 		<error-handler ref="globalErrorHandler"/>
     </flow>
-	</mule>
+	
+</mule>

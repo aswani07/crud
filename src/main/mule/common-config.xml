@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
 	xmlns:email="http://www.mulesoft.org/schema/mule/email"
 	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd 
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
 http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
-http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
 	  <db:config name="Database_Config" doc:name="Database Config" doc:id="e921daad-7f8c-4681-9b30-0aa7f5f36586" >
 		<db:my-sql-connection host="${secure::dev.host}" port="${secure::dev.port}" user="${secure::dev.user}" password="${secure::dev.password}" database="${secure::dev.database}" />
 	</db:config>
@@ -25,12 +26,18 @@ http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/em
 		<secure-properties:encrypt algorithm="Blowfish" />
 	</secure-properties:config>
 	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="26d9bcda-f4f8-46ef-a891-f42ac17bbd13" >
-		<email:smtp-connection host="smtp.gmail.com">
-		</email:smtp-connection>
-	</email:smtp-config>
+		<email:smtps-connection host="smtp.gmail.com" tlsContext="TLS_Context"/>
+	
+</email:smtp-config>
 		<tls:context name="TLS_Context" doc:name="TLS Context" doc:id="cda4ef9b-8f5a-422c-bcac-292df9667faa" >
 		<tls:trust-store insecure="true" />
 	</tls:context>
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="7ce1866c-bfbe-42f8-9aee-07d894f9ff07" >
+		<wsc:connection wsdlLocation="http://address-service.us-e2.cloudhub.io/QuintrixAddressService?wsdl" service="QuintrixAddressService" port="AddressServicePort" address="http://address-service.us-e2.cloudhub.io/QuintrixAddressService" />
+	</wsc:config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="b1af013b-ad7b-46ba-983d-0508bcd5c6bf" >
+		<http:request-connection host="country-api.us-e2.cloudhub.io" port="80"/>
+	</http:request-config>
 		
 	
 	
